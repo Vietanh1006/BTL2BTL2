@@ -1,23 +1,23 @@
 using MaiVietAnhBTH2.Data;
 using MaiVietAnhBTH2.Models;
 using MaiVietAnhBTH2.Models.Process;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace MaiVietAnhBTH2.Controllers;
 
-public class StudentController : Controller
+public class EmployeeController : Controller
 {
   private readonly ApplicationDbContext _context;
   private ExcelProcess _excelProcess = new ExcelProcess();
-
-  public StudentController(ApplicationDbContext context)
+  public EmployeeController(ApplicationDbContext context)
   {
     _context = context;
   }
   public async Task<IActionResult> Index()
   {
-    var model = await _context.Students.ToListAsync();
+    var model = await _context.Employees.ToListAsync();
     return View(model);
   }
   public IActionResult Create()
@@ -25,17 +25,16 @@ public class StudentController : Controller
     return View();
   }
   [HttpPost]
-  public async Task<IActionResult> Create(Student student)
+  public async Task<IActionResult> Create(Employee employee)
   {
     if (ModelState.IsValid)
     {
-      _context.Students.Add(student);
+      _context.Employees.Add(employee);
       await _context.SaveChangesAsync();
       return RedirectToAction(nameof(Index));
     }
-    return View(student);
+    return View(employee);
   }
-
   [HttpGet]
   public IActionResult Upload()
   {
@@ -66,12 +65,12 @@ public class StudentController : Controller
           var dataTable = _excelProcess.ExcelToDataTable(fileLocation);
           for (int i = 0; i < dataTable.Rows.Count; i++)
           {
-            var student = new Student();
-            student.StudentID = dataTable.Rows[0][0].ToString();
-            student.StudentName = dataTable.Rows[0][1].ToString();
-            student.Address = dataTable.Rows[0][2].ToString();
+            var employee = new Employee();
+            employee.EmployeeID = dataTable.Rows[0][0].ToString();
+            employee.EmployeeName = dataTable.Rows[0][1].ToString();
+            employee.Address = dataTable.Rows[0][2].ToString();
 
-            _context.Students.Add(student);
+            _context.Employees.Add(employee);
           }
           await _context.SaveChangesAsync();
           return RedirectToAction(nameof(Index));
@@ -81,24 +80,23 @@ public class StudentController : Controller
     return View();
   }
 
-  [HttpGet]
   public async Task<IActionResult> Edit(string id)
   {
     if (id == null)
     {
       return NotFound();
     }
-    var student = await _context.Students.FindAsync(id);
-    if (student == null)
+    var employee = await _context.Employees.FindAsync(id);
+    if (employee == null)
     {
       return NotFound();
     }
-    return View(student);
+    return View(employee);
   }
   [HttpPost]
-  public async Task<IActionResult> Edit(string id, [Bind("StudentID, StudentName")] Student student)
+  public async Task<IActionResult> Edit(string id, [Bind("EmployeeID, EmployeeName")] Employee employee)
   {
-    if (id != student.StudentID)
+    if (id != employee.EmployeeID)
     {
       return NotFound();
     }
@@ -106,13 +104,13 @@ public class StudentController : Controller
     {
       try
       {
-        _context.Students.Update(student);
+        _context.Employees.Update(employee);
         await _context.SaveChangesAsync();
         return RedirectToAction(nameof(Index));
       }
       catch (DbUpdateConcurrencyException)
       {
-        if (!StudentExists(student.StudentID))
+        if (!EmployeeExists(employee.EmployeeID))
         {
           return NotFound();
         }
@@ -122,7 +120,7 @@ public class StudentController : Controller
         }
       }
     }
-    return View(student);
+    return View(employee);
   }
   public async Task<IActionResult> Delete(string id)
   {
@@ -130,27 +128,27 @@ public class StudentController : Controller
     {
       return NotFound();
     }
-    var student = await _context.Students.FirstOrDefaultAsync(s => s.StudentID == id);
-    if (student == null)
+    var employee = await _context.Employees.FirstOrDefaultAsync(e => e.EmployeeID == id);
+    if (employee == null)
     {
       return NotFound();
     }
 
-    return View(student);
+    return View(employee);
   }
   [HttpPost, ActionName("Delete")]
   [ValidateAntiForgeryToken]
   public async Task<IActionResult> DeleteConfirmed(string id)
   {
-    var student = await _context.Students.FindAsync(id);
-    if (student != null)
+    var employee = await _context.Employees.FindAsync(id);
+    if (employee != null)
     {
-      _context.Students.Remove(student);
+      _context.Employees.Remove(employee);
       await _context.SaveChangesAsync();
     }
     return RedirectToAction(nameof(Index));
   }
 
-  private bool StudentExists(string id) => _context.Students.Any(e => e.StudentID == id);
+  private bool EmployeeExists(string id) => _context.Employees.Any(e => e.EmployeeID == id);
 }
 
